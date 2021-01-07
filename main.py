@@ -13,7 +13,7 @@ player_group = pygame.sprite.Group()
 walls_group = pygame.sprite.Group()
 bushes_group = pygame.sprite.Group()
 
-FPS = 60
+FPS = 30
 
 
 def load_image(name, colorkey=None):
@@ -41,7 +41,6 @@ def terminate():
 def start_screen():
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
-    text_coord = 50
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -95,69 +94,63 @@ class Player(pygame.sprite.Sprite):
             tile_width * pos_x, tile_height * pos_y)
         self.distinction = "w"
 
-    def update(self, event):
-        move = None
-        try:
-            if event.key == pygame.K_w:
-                move = (0, -tile_width)
-                if self.distinction == "w":
-                    pass
-                elif self.distinction == "s":
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.distinction == "a":
-                    self.image = pygame.transform.rotate(self.image, 270)
-                elif self.distinction == "d":
-                    self.image = pygame.transform.rotate(self.image, 90)
-                self.distinction = "w"
+    def change_position(self):
+        move = (0, 0)
 
-            elif event.key == pygame.K_s:
-                move = (0, tile_width)
-                if self.distinction == "w":
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.distinction == "s":
-                    pass
-                elif self.distinction == "a":
-                    self.image = pygame.transform.rotate(self.image, 90)
-                elif self.distinction == "d":
-                    self.image = pygame.transform.rotate(self.image, 270)
-                self.distinction = "s"
+        if pygame.key.get_pressed()[pygame.K_w]:
+            move = (0, -tile_width / 10)
+            if self.distinction == "w":
+                pass
+            elif self.distinction == "s":
+                self.image = pygame.transform.rotate(self.image, 180)
+            elif self.distinction == "a":
+                self.image = pygame.transform.rotate(self.image, 270)
+            elif self.distinction == "d":
+                self.image = pygame.transform.rotate(self.image, 90)
+            self.distinction = "w"
 
-            elif event.key == pygame.K_d:
-                move = (tile_width, 0)
-                if self.distinction == "w":
-                    self.image = pygame.transform.rotate(self.image, 270)
-                elif self.distinction == "s":
-                    self.image = pygame.transform.rotate(self.image, 90)
-                elif self.distinction == "a":
-                    self.image = pygame.transform.rotate(self.image, 180)
-                elif self.distinction == "d":
-                    pass
-                self.distinction = "d"
+        elif pygame.key.get_pressed()[pygame.K_s]:
+            move = (0, tile_width / 10)
+            if self.distinction == "w":
+                self.image = pygame.transform.rotate(self.image, 180)
+            elif self.distinction == "s":
+                pass
+            elif self.distinction == "a":
+                self.image = pygame.transform.rotate(self.image, 90)
+            elif self.distinction == "d":
+                self.image = pygame.transform.rotate(self.image, 270)
+            self.distinction = "s"
 
-            elif event.key == pygame.K_a:
-                move = (-tile_width, 0)
-                if self.distinction == "w":
-                    self.image = pygame.transform.rotate(self.image, 90)
-                elif self.distinction == "s":
-                    self.image = pygame.transform.rotate(self.image, 270)
-                elif self.distinction == "a":
-                    pass
-                elif self.distinction == "d":
-                    self.image = pygame.transform.rotate(self.image, 180)
-                self.distinction = "a"
+        if pygame.key.get_pressed()[pygame.K_d]:
+            move = (tile_width / 10, 0)
+            if self.distinction == "w":
+                self.image = pygame.transform.rotate(self.image, 270)
+            elif self.distinction == "s":
+                self.image = pygame.transform.rotate(self.image, 90)
+            elif self.distinction == "a":
+                self.image = pygame.transform.rotate(self.image, 180)
+            elif self.distinction == "d":
+                pass
+            self.distinction = "d"
 
-            self.rect = self.rect.move(move)
-            if pygame.sprite.spritecollideany(self, walls_group):
-                self.rect = self.rect.move(-move[0], -move[1])
-        except Exception:
-            print("Используйте wasd для управления марио")
+        if pygame.key.get_pressed()[pygame.K_a]:
+            move = (-tile_width / 10, 0)
+            if self.distinction == "w":
+                self.image = pygame.transform.rotate(self.image, 90)
+            elif self.distinction == "s":
+                self.image = pygame.transform.rotate(self.image, 270)
+            elif self.distinction == "a":
+                pass
+            elif self.distinction == "d":
+                self.image = pygame.transform.rotate(self.image, 180)
+            self.distinction = "a"
+
+        self.rect = self.rect.move(move)
+        if pygame.sprite.spritecollideany(self, walls_group):
+            self.rect = self.rect.move(-move[0], -move[1])
 
 
 player = None
-
-all_sprites = pygame.sprite.Group()
-tiles_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -182,9 +175,8 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             terminate()
-
-        if event.type == pygame.KEYDOWN:
-            player_group.update(event)
+        player.change_position()
+        clock.tick(FPS)
         screen.fill((0, 0, 0))
         all_sprites.draw(screen)
         player_group.draw(screen)
